@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35828.75
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Covauto.API", "Covauto.API\Covauto.API.csproj", "{379987D9-4421-4373-A668-BFC3BD8F04DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Covauto.Domain", "Covauto.Domain\Covauto.Domain.csproj", "{4F8F6610-A4AA-4038-95FA-226485B7A87B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Covauto.Application", "Covauto.Application\Covauto.Application.csproj", "{69F0C487-6D58-4AC1-88AF-EF31BEDEEE3A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{379987D9-4421-4373-A668-BFC3BD8F04DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{379987D9-4421-4373-A668-BFC3BD8F04DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{379987D9-4421-4373-A668-BFC3BD8F04DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{379987D9-4421-4373-A668-BFC3BD8F04DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F8F6610-A4AA-4038-95FA-226485B7A87B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F8F6610-A4AA-4038-95FA-226485B7A87B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F8F6610-A4AA-4038-95FA-226485B7A87B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F8F6610-A4AA-4038-95FA-226485B7A87B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69F0C487-6D58-4AC1-88AF-EF31BEDEEE3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69F0C487-6D58-4AC1-88AF-EF31BEDEEE3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69F0C487-6D58-4AC1-88AF-EF31BEDEEE3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69F0C487-6D58-4AC1-88AF-EF31BEDEEE3A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {908D41E9-7C7B-4C0E-A22F-9560FD1CA3DD}
+	EndGlobalSection
+EndGlobal

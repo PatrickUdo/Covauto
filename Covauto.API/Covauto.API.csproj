@@ -15,4 +15,9 @@
     <Folder Include="Repositories\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Covauto.Application\Covauto.Application.csproj" />
+    <ProjectReference Include="..\Covauto.Domain\Covauto.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -7,7 +7,7 @@ namespace Covauto.Domain
     {
         public static void RegisterServices(IServiceCollection services, string connectionString)
         {
-            services.AddSqlite<LeenAutoContext>(connectionString);
+            services.AddSqlite<AppDbContext>(connectionString);
         }
     }
 }

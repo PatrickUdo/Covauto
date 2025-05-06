@@ -6,9 +6,9 @@ namespace Covauto.Domain
 {
     public class LeenAutoRitRepository
     {
-        private readonly LeenAutoContext _context;
+        private readonly AppDbContext _context;
 
-        public LeenAutoRitRepository(LeenAutoContext context)
+        public LeenAutoRitRepository(AppDbContext context)
         {
             _context = context;
         }

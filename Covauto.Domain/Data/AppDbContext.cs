@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Covauto.Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Covauto.Domain.Data
 {
-    public class LeenAutoContext : DbContext
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
-        public LeenAutoContext(DbContextOptions<LeenAutoContext> options) : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<LeenAutoRit> LeenAutoRit { get; set; }
 

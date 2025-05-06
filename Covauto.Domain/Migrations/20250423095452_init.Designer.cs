@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Covauto.Domain.Migrations
 {
-    [DbContext(typeof(LeenAutoContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20250423095452_init")]
     partial class init
     {

@@ -1,4 +1,4 @@
-﻿namespace Covauto.Application.DTOs
+﻿namespace Covauto.Shared.DTOs
 {
     public class LeenAutoRitDTO
     {

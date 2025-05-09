@@ -1,15 +1,15 @@
-﻿using Covauto.Domain;
-using Covauto.Application.DTOs;
-using Covauto.Domain.Entities;
+﻿using Covauto.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Covauto.Shared.DTOs;
+using Covauto.Application.Interfaces;
 
 [ApiController]
 [Route("api/[controller]")]
 public class LeenAutoRitController : ControllerBase
 {
-    private readonly LeenAutoRitRepository _repository;
+    private readonly ILeenAutoRitRepository _repository;
 
-    public LeenAutoRitController(LeenAutoRitRepository repository)
+    public LeenAutoRitController(ILeenAutoRitRepository repository)
     {
         _repository = repository;
     }

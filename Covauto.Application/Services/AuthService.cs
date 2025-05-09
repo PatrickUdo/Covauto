@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Covauto.Domain.Entities;
-using Covauto.Application.DTOs;
+using Covauto.Shared.DTOs;
 
 namespace Covauto.Application
 {

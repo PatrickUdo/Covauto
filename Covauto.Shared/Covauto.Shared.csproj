@@ -7,13 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.39" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Covauto.Domain\Covauto.Domain.csproj" />
-    <ProjectReference Include="..\Covauto.Shared\Covauto.Shared.csproj" />
   </ItemGroup>
 
 </Project>

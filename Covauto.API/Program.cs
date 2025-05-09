@@ -55,12 +55,17 @@ namespace Covauto.API
                     }
                 };
             });
+            builder.Services.AddAutoMapper(typeof(Covauto.Application.Mappings.MappingProfile).Assembly);
 
             builder.Services.AddAuthorization();
 
             ServiceConfiguration.RegisterServices(builder.Services, builder.Configuration.GetConnectionString("DefaultConnection"));
 
             builder.Services.AddScoped<ILeenAutoRitRepository, LeenAutoRitRepository>();
+            builder.Services.AddScoped<ILeenAutoReserveringRepository, LeenAutoReserveringRepository>();
+            builder.Services.AddScoped<IAutoRepository, AutoRepository>();
+
+
             builder.Services.AddScoped<AuthService>();
 
             builder.Services.AddControllers();

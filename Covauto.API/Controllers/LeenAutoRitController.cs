@@ -1,24 +1,28 @@
-﻿using Covauto.Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Covauto.Shared.DTOs;
+﻿using AutoMapper;
 using Covauto.Application.Interfaces;
+using Covauto.Domain.Entities;
+using Covauto.Shared.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
 public class LeenAutoRitController : ControllerBase
 {
     private readonly ILeenAutoRitRepository _repository;
+    private readonly IMapper _mapper;
 
-    public LeenAutoRitController(ILeenAutoRitRepository repository)
+    public LeenAutoRitController(ILeenAutoRitRepository repository, IMapper mapper)
     {
         _repository = repository;
+        _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         var ritten = await _repository.GetAllAsync();
-        return Ok(ritten);
+        var result = _mapper.Map<IEnumerable<LeenAutoRitDTO>>(ritten);
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
@@ -26,51 +30,31 @@ public class LeenAutoRitController : ControllerBase
     {
         var rit = await _repository.GetByIdAsync(id);
         if (rit == null) return NotFound();
-        return Ok(rit);
+        var result = _mapper.Map<LeenAutoRitDTO>(rit);
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] LeenAutoRitDTO dto)
     {
-        var rit = new LeenAutoRit
-        {
-            WerknemerId = dto.WerknemerId,
-            VanAdres = dto.VanAdres,
-            NaarAdres = dto.NaarAdres,
-            VertrekTijd = dto.VertrekTijd,
-            KilometerstandBegin = dto.KilometerstandBegin,
-            KilometerstandEind = dto.KilometerstandEind
-        };
-
+        var rit = _mapper.Map<LeenAutoRit>(dto);
         var added = await _repository.AddAsync(rit);
-        return CreatedAtAction(nameof(GetById), new { id = added.Id }, added);
+        var result = _mapper.Map<LeenAutoRitDTO>(added);
+        return CreatedAtAction(nameof(GetById), new { id = added.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] LeenAutoRitDTO dto)
     {
-        var updatedRit = new LeenAutoRit
-        {
-            WerknemerId = dto.WerknemerId,
-            VanAdres = dto.VanAdres,
-            NaarAdres = dto.NaarAdres,
-            VertrekTijd = dto.VertrekTijd,
-            KilometerstandBegin = dto.KilometerstandBegin,
-            KilometerstandEind = dto.KilometerstandEind
-        };
-
+        var updatedRit = _mapper.Map<LeenAutoRit>(dto);
         var success = await _repository.UpdateAsync(id, updatedRit);
-        if (!success) return NotFound();
-
-        return NoContent();
+        return success ? NoContent() : NotFound();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         var success = await _repository.DeleteAsync(id);
-        if (!success) return NotFound();
-
-        return NoContent();
+        return success ? NoContent() : NotFound();
     }
 }

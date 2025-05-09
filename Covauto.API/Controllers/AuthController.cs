@@ -1,12 +1,11 @@
-﻿using Covauto.Application.DTOs;
-using Covauto.Application;
+﻿using Covauto.Shared.DTOs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
+using Covauto.Application;
 
 namespace Covauto.API.Controllers
 {
@@ -35,7 +34,7 @@ namespace Covauto.API.Controllers
             var userByEmail = await _authService.FindUserByEmail(loginDto.Email);
             if (userByEmail != null && await _authService.IsLockedOut(userByEmail))
             {
-                return StatusCode(StatusCodes.Status423Locked, "Account is locked out due to too many failed login attempts. Please try again later.");
+                return StatusCode(StatusCodes.Status423Locked, "Try again later.");
             }
 
             var user = await _authService.ValidateUser(loginDto);
@@ -44,7 +43,7 @@ namespace Covauto.API.Controllers
             {
                 if (userByEmail != null && await _authService.IsLockedOut(userByEmail))
                 {
-                    return StatusCode(StatusCodes.Status423Locked, "Account is now locked out due to too many failed login attempts. Please try again later.");
+                    return StatusCode(StatusCodes.Status423Locked, "Too many failed login attempts. Try again later.");
                 }
 
                 return Unauthorized("Invalid credentials.");
@@ -87,7 +86,7 @@ namespace Covauto.API.Controllers
         {
             if (User?.Identity is not { IsAuthenticated: true })
             {
-                return Unauthorized(new { Message = "User is NOT authenticated" });
+                return Unauthorized(new { Message = "User is not authenticated" });
             }
             var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
             return Ok(new

@@ -1,10 +1,11 @@
-﻿using Covauto.Domain.Data;
+﻿using Covauto.Application.Interfaces;
+using Covauto.Domain.Data;
 using Covauto.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Covauto.Domain
 {
-    public class LeenAutoRitRepository
+    public class LeenAutoRitRepository : ILeenAutoRitRepository
     {
         private readonly AppDbContext _context;
 

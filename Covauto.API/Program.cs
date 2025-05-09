@@ -1,4 +1,5 @@
 using Covauto.Application;
+using Covauto.Application.Interfaces;
 using Covauto.Domain;
 using Covauto.Domain.Data;
 using Covauto.Domain.Entities;
@@ -58,7 +59,8 @@ namespace Covauto.API
             builder.Services.AddAuthorization();
 
             ServiceConfiguration.RegisterServices(builder.Services, builder.Configuration.GetConnectionString("DefaultConnection"));
-            builder.Services.AddScoped<LeenAutoRitRepository>();
+
+            builder.Services.AddScoped<ILeenAutoRitRepository, LeenAutoRitRepository>();
             builder.Services.AddScoped<AuthService>();
 
             builder.Services.AddControllers();

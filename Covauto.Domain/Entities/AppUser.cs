@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Covauto.Domain.Entities
 {
     public class AppUser : IdentityUser
     {
+        public ICollection<LeenAutoReservering> LeenAutoReserveringen { get; set; }
+        public ICollection<LeenAutoRit> LeenAutoRitten { get; set; }
     }
 }

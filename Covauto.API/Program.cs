@@ -67,6 +67,16 @@ namespace Covauto.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalhostFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5260") // Blazor app origin
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+            
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -81,7 +91,8 @@ namespace Covauto.API
             app.UseAuthorization();
 
             app.MapControllers();
-
+            app.UseCors("AllowLocalhostFrontend");
+    
             app.Run();
         }
     }

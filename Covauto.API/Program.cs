@@ -98,6 +98,8 @@ namespace Covauto.API
             app.MapControllers();
             app.UseCors("AllowLocalhostFrontend");
     
+            app.Urls.Add("http://localhost:5095");
+            
             app.Run();
         }
     }

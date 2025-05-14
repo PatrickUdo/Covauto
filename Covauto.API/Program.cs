@@ -55,17 +55,12 @@ namespace Covauto.API
                     }
                 };
             });
-            builder.Services.AddAutoMapper(typeof(Covauto.Application.Mappings.MappingProfile).Assembly);
 
             builder.Services.AddAuthorization();
 
             ServiceConfiguration.RegisterServices(builder.Services, builder.Configuration.GetConnectionString("DefaultConnection"));
 
             builder.Services.AddScoped<ILeenAutoRitRepository, LeenAutoRitRepository>();
-            builder.Services.AddScoped<ILeenAutoReserveringRepository, LeenAutoReserveringRepository>();
-            builder.Services.AddScoped<IAutoRepository, AutoRepository>();
-
-
             builder.Services.AddScoped<AuthService>();
 
             builder.Services.AddControllers();
@@ -76,17 +71,12 @@ namespace Covauto.API
             {
                 options.AddPolicy("AllowLocalhostFrontend", policy =>
                 {
-                    policy
-                        .SetIsOriginAllowed(origin =>
-                        {
-                            return new Uri(origin).Host == "localhost";
-                        })
+                    policy.WithOrigins("http://localhost:5260") // Blazor app origin
                         .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
+                        .AllowAnyMethod();
                 });
             });
-
+            
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -96,12 +86,13 @@ namespace Covauto.API
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowLocalhostFrontend");
+
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
-
+            app.UseCors("AllowLocalhostFrontend");
+    
             app.Run();
         }
     }

@@ -71,9 +71,9 @@ namespace Covauto.API
             {
                 options.AddPolicy("AllowLocalhostFrontend", policy =>
                 {
-                    policy.AllowAnyMethod()
-                        .AllowAnyOrigin()
-                        .AllowAnyHeader();
+                    policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 });
             });
             

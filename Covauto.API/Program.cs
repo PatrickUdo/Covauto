@@ -76,9 +76,9 @@ namespace Covauto.API
             {
                 options.AddPolicy("AllowLocalhostFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5260") // Blazor app origin
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
+                    policy.AllowAnyMethod()
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader();
                 });
             });
             

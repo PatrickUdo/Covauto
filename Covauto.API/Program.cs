@@ -72,6 +72,21 @@ namespace Covauto.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalhostFrontend", policy =>
+                {
+                    policy
+                        .SetIsOriginAllowed(origin =>
+                        {
+                            return new Uri(origin).Host == "localhost";
+                        })
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -81,7 +96,7 @@ namespace Covauto.API
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("AllowLocalhostFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
 

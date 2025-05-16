@@ -4,6 +4,7 @@ using Covauto.Blazor;
 using System;
 using System.Net.Http;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using Covauto.Blazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -18,7 +19,7 @@ builder.Services.AddScoped(sp =>
 
     return httpClient;
 });
-
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri("http://localhost:5095/")

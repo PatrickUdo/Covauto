@@ -1,71 +1,72 @@
 @page "/login"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
 
 <div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-sm p-8 bg-white rounded-lg shadow-lg">
-        <h2 class="mb-6 text-2xl font-bold text-center text-gray-800">Login</h2>
-
-        <div class="mb-4">
-            <label class="block mb-2 text-sm font-medium text-gray-700" for="email">Email</label>
-            <input @bind="Email" id="email" type="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        </div>
-
-        <div class="mb-6">
-            <label class="block mb-2 text-sm font-medium text-gray-700" for="password">Password</label>
-            <input @bind="Password" id="password" type="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        </div>
-
-        <button @onclick="LoginAsync" class="w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none">
-            Log In
-        </button>
-
-        @if (!string.IsNullOrEmpty(Message))
-        {
-            <div class="mt-4 text-center text-sm @(IsError ? "text-red-500" : "text-green-500")">@Message</div>
-        }
-    </div>
+	<div class="w-full max-w-sm p-8 bg-white rounded-lg shadow-lg">
+		<h2 class="mb-6 text-2xl font-bold text-center text-gray-800">Login</h2>
+		<div class="mb-4">
+			<label class="block mb-2 text-sm font-medium text-gray-700" for="email">Email</label>
+			<input @bind="Email" id="email" type="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+		</div>
+		<div class="mb-6">
+			<label class="block mb-2 text-sm font-medium text-gray-700" for="password">Password</label>
+			<input @bind="Password" id="password" type="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+		</div>
+		<button @onclick="LoginAsync" class="w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none">
+			Log In
+		</button>
+		@if (!string.IsNullOrEmpty(Message))
+		{
+			<div class="mt-4 text-center text-sm @(IsError ? "text-red-500" : "text-green-500")">@Message</div>
+		}
+	</div>
 </div>
 
 @code {
-    private string Email { get; set; } = string.Empty;
-    private string Password { get; set; } = string.Empty;
-    private string Message { get; set; } = string.Empty;
-    private bool IsError { get; set; }
+	private string Email { get; set; } = string.Empty;
+	private string Password { get; set; } = string.Empty;
+	private string Message { get; set; } = string.Empty;
+	private bool IsError { get; set; }
 
-    private async Task LoginAsync()
-    {
-        var loginData = new
-        {
-            email = Email,
-            password = Password
-        };
+	private async Task LoginAsync()
+	{
+		var loginData = new
+		{
+			email = Email,
+			password = Password
+		};
 
-        var json = System.Text.Json.JsonSerializer.Serialize(loginData);
-        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+		try
+		{
+			var request = new HttpRequestMessage(HttpMethod.Post, "api/auth/login");
+			request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+			request.Content = new StringContent(
+				System.Text.Json.JsonSerializer.Serialize(loginData),
+				System.Text.Encoding.UTF8,
+				"application/json");
 
-        try
-        {
-            var response = await Http.PostAsync("http://localhost:5095/api/auth/login", content);
+			var response = await Http.SendAsync(request);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                Message = "Login successful!";
-                IsError = false;
-                NavigationManager.NavigateTo("/dashboard");
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                Message = $"Login failed: {error}";
-                IsError = true;
-            }
-        }
-        catch (Exception ex)
-        {
-            Message = $"An error occurred: {ex.Message}";
-            IsError = true;
-        }
-    }
+			if (response.IsSuccessStatusCode)
+			{
+				var responseContent = await response.Content.ReadAsStringAsync();
+				Message = "Login successful!";
+				IsError = false;
+				NavigationManager.NavigateTo("/dashboard");
+			}
+			else
+			{
+				var error = await response.Content.ReadAsStringAsync();
+				Message = $"Login failed: {error}";
+				IsError = true;
+			}
+		}
+		catch (Exception ex)
+		{
+			Message = $"An error occurred: {ex.Message}";
+			IsError = true;
+		}
+	}
 }

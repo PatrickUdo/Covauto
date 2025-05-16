@@ -1,78 +1,81 @@
 @page "/dashboard"
 @using System.Text.Json
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
 @inject HttpClient Http
 @inject NavigationManager Nav
 
 <div class="min-h-screen bg-gray-100 p-8">
-    <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
-            <button @onclick="Logout" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none">
-                Logout
-            </button>
-        </div>
+	<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+		<div class="flex justify-between items-center mb-6">
+			<h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+			<button @onclick="Logout" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none">
+				Logout
+			</button>
+		</div>
 
-        @if (IsLoading)
-        {
-            <p>Loading...</p>
-        }
-        else if (!string.IsNullOrEmpty(Username))
-        {
-            <p class="text-gray-700">Welcome, <strong>@Username</strong>!</p>
-        }
-        else if (!string.IsNullOrEmpty(Message))
-        {
-            <p class="text-red-500">@Message</p>
-        }
-    </div>
+		@if (IsLoading)
+		{
+			<p>Loading...</p>
+		}
+		else if (!string.IsNullOrEmpty(Username))
+		{
+			<p class="text-gray-700">Welcome, <strong>@Username</strong>!</p>
+		}
+		else if (!string.IsNullOrEmpty(Message))
+		{
+			<p class="text-red-500">@Message</p>
+		}
+	</div>
 </div>
 
 @code {
-    private string Username { get; set; } = string.Empty;
-    private string Message { get; set; } = string.Empty;
-    private bool IsLoading { get; set; } = true;
+	private string Username { get; set; } = string.Empty;
+	private string Message { get; set; } = string.Empty;
+	private bool IsLoading { get; set; } = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            var response = await Http.GetAsync("http://localhost:5095/api/auth/me");
-            var content = await response.Content.ReadAsStringAsync();
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			var request = new HttpRequestMessage(HttpMethod.Get, "api/auth/me");
+			request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var jsonDoc = JsonDocument.Parse(content);
-                if (jsonDoc.RootElement.TryGetProperty("username", out var usernameProp))
-                {
-                    Username = usernameProp.GetString();
-                }
-                else
-                {
-                    Message = "Username not found in response.";
-                }
-            }
-            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                Nav.NavigateTo("/login", forceLoad: true);
-            }
-            else
-            {
-                Message = $"Failed to load user: {content}";
-            }
-        }
-        catch (Exception ex)
-        {
-            Message = $"An error occurred: {ex.Message}";
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
+			var response = await Http.SendAsync(request);
+			var content = await response.Content.ReadAsStringAsync();
 
-    private void Logout()
-    {
-        // Simply navigate to a logout endpoint or login page if using cookie auth
-        Nav.NavigateTo("/login", forceLoad: true);
-    }
+			if (response.IsSuccessStatusCode)
+			{
+				var jsonDoc = JsonDocument.Parse(content);
+				if (jsonDoc.RootElement.TryGetProperty("username", out var usernameProp))
+				{
+					Username = usernameProp.GetString();
+				}
+				else
+				{
+					Message = "Username not found in response.";
+				}
+			}
+			else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+			{
+				Nav.NavigateTo("/login");
+			}
+			else
+			{
+				Message = $"Failed to load user: {content}";
+			}
+		}
+		catch (Exception ex)
+		{
+			Message = $"An error occurred: {ex.Message}";
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+
+	private void Logout()
+	{
+		Nav.NavigateTo("/login");
+	}
 }

@@ -1,7 +1,7 @@
 @page "/dashboard"
 @using System.Text.Json
 @inject NavigationManager Nav
-@inject Covauto.Blazor.Services.AuthService AuthService
+@inject Covauto.Blazor.Services.IAuthService AuthService
 
 <ErrorBoundary>
 	<ChildContent>
@@ -9,9 +9,6 @@
 			<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
 				<div class="flex justify-between items-center mb-6">
 					<h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
-					<button @onclick="LogoutAsync" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none">
-						Logout
-					</button>
 				</div>
 
 				@if (IsLoading)
@@ -95,19 +92,6 @@
 		finally
 		{
 			IsLoading = false;
-		}
-	}
-
-	private async Task LogoutAsync()
-	{
-		try
-		{
-			await AuthService.LogoutAsync();
-			Nav.NavigateTo("/login", forceLoad: true);
-		}
-		catch
-		{
-			Nav.NavigateTo("/login", forceLoad: true);
 		}
 	}
 }

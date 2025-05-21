@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Covauto.Blazor.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly HttpClient _httpClient;
 

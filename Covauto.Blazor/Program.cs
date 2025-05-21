@@ -27,6 +27,8 @@ builder.Services.AddScoped(sp => new HttpClient
 .EnableIntercept(sp)
 .EnableCookies());
 
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
 await builder.Build().RunAsync();
 
 public static class HttpClientExtensions

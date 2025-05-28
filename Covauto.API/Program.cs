@@ -1,5 +1,6 @@
 using Covauto.Application;
 using Covauto.Application.Interfaces;
+using Covauto.Application.Mappings;
 using Covauto.Domain;
 using Covauto.Domain.Data;
 using Covauto.Domain.Entities;
@@ -61,9 +62,13 @@ namespace Covauto.API
             ServiceConfiguration.RegisterServices(builder.Services, builder.Configuration.GetConnectionString("DefaultConnection"));
 
             builder.Services.AddScoped<ILeenAutoRitRepository, LeenAutoRitRepository>();
+            builder.Services.AddScoped<IAutoRepository, AutoRepository>();
+            builder.Services.AddScoped<ILeenAutoReserveringRepository, LeenAutoReserveringRepository>();
+
             builder.Services.AddScoped<AuthService>();
 
             builder.Services.AddControllers();
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 

@@ -20,6 +20,7 @@ builder.Services.AddScoped(sp =>
     return httpClient;
 });
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri("http://localhost:5095/")
@@ -28,7 +29,6 @@ builder.Services.AddScoped(sp => new HttpClient
 .EnableCookies());
 
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
-
 await builder.Build().RunAsync();
 
 public static class HttpClientExtensions

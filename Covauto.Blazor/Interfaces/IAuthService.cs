@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Covauto.Shared.DTOs;
 
 namespace Covauto.Blazor.Interfaces
 {
@@ -7,6 +8,6 @@ namespace Covauto.Blazor.Interfaces
         Task<bool> IsAuthenticatedAsync();
         Task<(bool Success, string Message, string Username)> LoginAsync(string email, string password);
         Task<bool> LogoutAsync();
-        Task<(bool Success, string Username, string Message)> GetUserInfoAsync();
+        Task<UserInfoResult> GetUserInfoAsync();
     }
 }

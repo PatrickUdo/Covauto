@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Covauto.Shared.DTOs;
 
 namespace Covauto.Blazor.Services
 {
@@ -92,7 +93,7 @@ namespace Covauto.Blazor.Services
             }
         }
 
-        public async Task<(bool Success, string Username, string Message)> GetUserInfoAsync()
+        public async Task<UserInfoResult> GetUserInfoAsync()
         {
             try
             {
@@ -105,27 +106,38 @@ namespace Covauto.Blazor.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonDoc = JsonDocument.Parse(content);
-                    string username = string.Empty;
+                    var root = jsonDoc.RootElement;
 
-                    if (jsonDoc.RootElement.TryGetProperty("username", out var usernameProp))
+                    var username = root.TryGetProperty("username", out var u) ? u.GetString() ?? string.Empty : string.Empty;
+                    var email = root.TryGetProperty("email", out var e) ? e.GetString() ?? string.Empty : string.Empty;
+                    var userId = root.TryGetProperty("userId", out var id) ? id.GetString() ?? string.Empty : string.Empty;
+
+                    return new UserInfoResult
                     {
-                        username = usernameProp.GetString() ?? string.Empty;
-                        return (true, username, string.Empty);
-                    }
-                    else
-                    {
-                        return (true, string.Empty, "Username not found in response");
-                    }
+                        Success = true,
+                        Username = username,
+                        Email = email,
+                        UserId = userId
+                    };
                 }
                 else
                 {
-                    return (false, string.Empty, $"Failed to get user info: {content}");
+                    return new UserInfoResult
+                    {
+                        Success = false,
+                        Message = $"Failed to get user info: {content}"
+                    };
                 }
             }
             catch (Exception ex)
             {
-                return (false, string.Empty, $"An error occurred: {ex.Message}");
+                return new UserInfoResult
+                {
+                    Success = false,
+                    Message = $"An error occurred: {ex.Message}"
+                };
             }
         }
+
     }
 }

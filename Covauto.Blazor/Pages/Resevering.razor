@@ -1,0 +1,168 @@
+@page "/reservering"
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject Covauto.Blazor.Services.AuthService AuthService
+
+<ErrorBoundary>
+    <ChildContent>
+        <div class="min-h-screen bg-gray-50 p-6">
+            <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-3xl font-semibold text-indigo-700 mb-6">Auto reserveren</h2>
+
+                @if (IsLoading)
+                {
+                    <div class="flex items-center justify-center space-x-2 text-indigo-600">
+                        <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
+                        <span class="text-lg">Gegevens laden...</span>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(Message))
+                {
+                    <div class="bg-red-100 border border-red-300 text-red-700 p-4 rounded-lg mb-4">
+                        <p>@Message</p>
+                    </div>
+                }
+                else
+                {
+                    <EditForm Model="@reservering" OnValidSubmit="HandleSubmit">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Auto</label>
+                                <select class="w-full p-2 border rounded-md focus:ring-2 focus:ring-indigo-400" @bind="reservering.AutoId">
+                                    <option value="">-- Selecteer een auto --</option>
+                                    @foreach (var auto in Autos)
+                                    {
+                                        <option value="@auto.Id">@auto.Kenteken (@auto.Kilometerstand km)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Startdatum</label>
+                                <input type="datetime-local" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-indigo-400" @bind="reservering.StartDatum" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Einddatum</label>
+                                <input type="datetime-local" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-indigo-400" @bind="reservering.EindDatum" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Werknemer ID</label>
+                                <input type="text" class="w-full p-2 border rounded-md bg-gray-100 cursor-not-allowed" @bind="reservering.WerknemerId" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Gebruikersnaam</label>
+                                <input type="text" class="w-full p-2 border rounded-md bg-gray-100 cursor-not-allowed" @bind="reservering.WerknemerUserName" disabled />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" class="w-full p-2 border rounded-md bg-gray-100 cursor-not-allowed" @bind="reservering.WerknemerEmail" disabled />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-md font-medium hover:bg-indigo-700 transition">
+                            Bevestig reservering
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(SuccessMessage))
+                        {
+                            <p class="mt-4 text-green-600 font-medium">@SuccessMessage</p>
+                        }
+                    </EditForm>
+                }
+            </div>
+        </div>
+    </ChildContent>
+    <ErrorContent>
+        <div class="bg-red-100 text-red-800 p-4 rounded">
+            Er is een onverwachte fout opgetreden.
+        </div>
+    </ErrorContent>
+</ErrorBoundary>
+
+@code {
+    private List<Auto> Autos = new();
+    private Reservering reservering = new();
+    private string Message = string.Empty;
+    private string SuccessMessage = string.Empty;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var user = await AuthService.GetUserInfoAsync();
+
+            if (!user.Success)
+            {
+                Nav.NavigateTo("/login");
+                return;
+            }
+
+            reservering.WerknemerUserName = user.Username;
+            reservering.WerknemerEmail = user.Email; // of haal dit ergens anders op
+            reservering.WerknemerId = user.UserId; // of gebruik GUID als je dat beschikbaar hebt
+
+            Autos = await Http.GetFromJsonAsync<List<Auto>>("/api/Auto") ?? new();
+        }
+        catch (Exception ex)
+        {
+            Message = $"Fout bij laden van gegevens: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        var selectedAuto = Autos.FirstOrDefault(a => a.Id == reservering.AutoId);
+        if (selectedAuto is null)
+        {
+            Message = "Selecteer een geldige auto.";
+            return;
+        }
+
+        reservering.Auto = selectedAuto;
+
+        var response = await Http.PostAsJsonAsync("api/LeenAutoResevering", reservering);
+        if (response.IsSuccessStatusCode)
+        {
+            SuccessMessage = "Reservering succesvol!";
+            reservering = new Reservering
+            {
+                WerknemerId = reservering.WerknemerId,
+                WerknemerUserName = reservering.WerknemerUserName,
+                WerknemerEmail = reservering.WerknemerEmail
+            };
+        }
+        else
+        {
+            Message = "Fout bij het verzenden van de reservering.";
+        }
+    }
+
+    public class Auto
+    {
+        public int Id { get; set; }
+        public string Kenteken { get; set; } = string.Empty;
+        public int Kilometerstand { get; set; }
+    }
+
+    public class Reservering
+    {
+        public int Id { get; set; } = 0;
+        public DateTime StartDatum { get; set; } = DateTime.Now;
+        public DateTime EindDatum { get; set; } = DateTime.Now;
+
+        public string WerknemerId { get; set; } = string.Empty;
+        public string WerknemerUserName { get; set; } = string.Empty;
+        public string WerknemerEmail { get; set; } = string.Empty;
+
+        public int AutoId { get; set; }
+        public Auto? Auto { get; set; }
+    }
+}

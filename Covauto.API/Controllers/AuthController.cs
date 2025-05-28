@@ -54,7 +54,8 @@ namespace Covauto.API.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier, user.Id)
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Email, user.Email)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -88,11 +89,16 @@ namespace Covauto.API.Controllers
             {
                 return Unauthorized(new { Message = "User is not authenticated" });
             }
-            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var username = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
             return Ok(new
             {
-                Username = User.Identity.Name,
-                Claims = claims
+                Email = email,
+                UserId = userId,
+                Username = username
             });
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Covauto.Blazor.Services
+namespace Covauto.Blazor.Interfaces
 {
     public interface IAuthService
     {

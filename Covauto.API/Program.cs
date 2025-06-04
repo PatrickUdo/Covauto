@@ -61,7 +61,6 @@ namespace Covauto.API
 
             ServiceConfiguration.RegisterServices(builder.Services, builder.Configuration.GetConnectionString("DefaultConnection"));
 
-            builder.Services.AddScoped<ILeenAutoRitRepository, LeenAutoRitRepository>();
             builder.Services.AddScoped<IAutoRepository, AutoRepository>();
             builder.Services.AddScoped<ILeenAutoReserveringRepository, LeenAutoReserveringRepository>();
 

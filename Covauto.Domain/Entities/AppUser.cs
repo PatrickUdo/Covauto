@@ -5,6 +5,5 @@ namespace Covauto.Domain.Entities
     public class AppUser : IdentityUser
     {
         public ICollection<LeenAutoReservering> LeenAutoReserveringen { get; set; }
-        public ICollection<LeenAutoRit> LeenAutoRitten { get; set; }
     }
 }

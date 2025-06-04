@@ -4,7 +4,9 @@
 
 <header class="bg-gray-900 text-white px-6 py-4 shadow-md">
 	<div class="container mx-auto flex items-center justify-between">
-		<h1 class="text-xl font-bold">Covadis leen auto</h1>
+		<h1 class="text-xl font-bold">
+			<a href="/" class="hover:text-indigo-300 transition duration-200">Covadis leen auto</a>
+		</h1>
 
 		<button class="md:hidden focus:outline-none" @onclick="ToggleMenu">
 			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -15,7 +17,7 @@
 		</button>
 
 		<nav class="hidden md:flex space-x-4">
-			<a href="/" class="text-white px-3 py-2 rounded-md hover:bg-gray-800 hover:text-indigo-300 transition duration-200">Reservering maken</a>
+			<a href="/reservering" class="text-white px-3 py-2 rounded-md hover:bg-gray-800 hover:text-indigo-300 transition duration-200">Reservering maken</a>
 			<button @onclick="LogoutAsync" class="text-white px-3 py-2 rounded-md hover:bg-gray-800 hover:text-indigo-300 transition duration-200">
 				Uitloggen
 			</button>
@@ -23,7 +25,7 @@
 	</div>
 
 	<div class="@($"md:hidden px-4 pt-2 pb-4 space-y-2 { (isMenuOpen ? "block" : "hidden") }")">
-		<a href="/" class="block text-white px-3 py-2 rounded-md hover:bg-gray-800 hover:text-indigo-300 transition duration-200">Reservering maken</a>
+		<a href="/reservering" class="block text-white px-3 py-2 rounded-md hover:bg-gray-800 hover:text-indigo-300 transition duration-200">Reservering maken</a>
 		<button @onclick="LogoutAsync" class="w-full text-left text-white px-3 py-2 rounded-md hover:bg-gray-800 hover:text-indigo-300 transition duration-200">
 			Uitloggen
 		</button>

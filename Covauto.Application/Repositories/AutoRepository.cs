@@ -31,6 +31,7 @@ namespace Covauto.Domain
 
             existing.Kenteken = updatedAuto.Kenteken;
             existing.Kilometerstand = updatedAuto.Kilometerstand;
+            existing.Naam = updatedAuto.Naam;
             await _context.SaveChangesAsync();
             return true;
         }

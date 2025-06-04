@@ -3,7 +3,8 @@
     public class AutoDTO
     {
         public int Id { get; set; }
-        public string kenteken { get; set; }
-        public int kilometerstand { get; set; }
+        public string Kenteken { get; set; }
+        public int Kilometerstand { get; set; }
+        public string Naam { get; set; }
     }
 }

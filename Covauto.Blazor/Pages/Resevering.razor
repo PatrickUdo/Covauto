@@ -1,0 +1,657 @@
+﻿@page "/reservering"
+@using System.Net.Http.Json
+@using Covauto.Domain.Entities
+@using Covauto.Shared.DTOs
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject Covauto.Blazor.Services.AuthService AuthService
+
+<ErrorBoundary>
+	<ChildContent>
+		<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+			<div class="max-w-7xl mx-auto">
+				<div class="text-center mb-8">
+					<h1 class="text-4xl font-bold text-slate-800 mb-2">Auto Reservering</h1>
+				</div>
+
+				@if (IsLoading)
+				{
+					<div class="flex items-center justify-center space-x-3 text-blue-600 py-20">
+						<div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-600"></div>
+						<span class="text-xl">Agenda laden...</span>
+					</div>
+				}
+				else if (!string.IsNullOrEmpty(Message))
+				{
+					<div class="bg-red-50 border-l-4 border-red-400 text-red-700 p-6 rounded-lg mb-8 mx-auto max-w-4xl shadow-sm">
+						<div class="flex items-center">
+							<i class="fas fa-exclamation-triangle mr-3 text-lg"></i>
+							<p class="font-medium">@Message</p>
+						</div>
+					</div>
+				}
+				else
+				{
+					<div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+						<div class="flex flex-col md:flex-row md:items-center gap-4">
+							<div class="flex-1">
+								<label class="block text-sm font-semibold text-slate-700 mb-3">Selecteer Auto</label>
+								<select class="w-full p-4 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
+										@onchange="OnAutoChanged">
+									<option value="0">🚗 Kies een beschikbare auto</option>
+									@foreach (var auto in Autos)
+									{
+										<option value="@auto.Id" selected="@(SelectedAutoId == auto.Id)">
+											🚙 @auto.Naam - @auto.Kenteken
+										</option>
+									}
+								</select>
+							</div>
+							@if (SelectedAutoId > 0)
+							{
+								var selectedAuto = Autos.FirstOrDefault(a => a.Id == SelectedAutoId);
+								<div class="bg-blue-50 p-4 rounded-xl border-2 border-blue-200">
+									<div class="text-center">
+										<div class="text-2xl mb-1">🚗</div>
+										<div class="font-bold text-blue-800">@selectedAuto?.Naam</div>
+										<div class="text-sm text-blue-600">@selectedAuto?.Kenteken</div>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+
+					@if (SelectedAutoId > 0)
+					{
+						@if (SelectedDate == null)
+						{
+							<div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+								<div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+									<div class="flex justify-between items-center">
+										<h2 class="text-2xl font-bold">📅 @CurrentMonth.ToString("MMMM yyyy")</h2>
+										<div class="flex items-center space-x-4">
+											<button class="p-2 hover:bg-blue-500 rounded-lg transition-colors @(IsMonthNavigationDisabled(false) ? "opacity-50 cursor-not-allowed" : "")"
+													@onclick="PreviousMonth"
+													disabled="@IsMonthNavigationDisabled(false)">
+												<i class="">&lt</i>
+											</button>
+											<span class="font-semibold text-lg">@CurrentMonth.ToString("MMM yyyy")</span>
+											<button class="p-2 hover:bg-blue-500 rounded-lg transition-colors @(IsMonthNavigationDisabled(true) ? "opacity-50 cursor-not-allowed" : "")"
+													@onclick="NextMonth"
+													disabled="@IsMonthNavigationDisabled(true)">
+												<i class="">&gt</i>
+											</button>
+										</div>
+									</div>
+								</div>
+								<div class="p-6">
+									<div class="grid grid-cols-7 gap-2 mb-4">
+										@foreach (var dayName in new[] { "Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo" })
+										{
+											<div class="p-3 text-center font-semibold text-slate-600 bg-slate-50 rounded-lg">
+												@dayName
+											</div>
+										}
+									</div>
+
+									<div class="grid grid-cols-7 gap-2">
+										@foreach (var day in GetCalendarDays())
+										{
+											var isCurrentMonth = day.Month == CurrentMonth.Month;
+											var isToday = day.Date == DateTime.Today;
+											var isPast = day.Date < DateTime.Today;
+											var hasReservations = HasReservationsOnDay(day);
+											var reservationCount = GetReservationCountForDay(day);
+
+											<button class="relative h-20 p-2 rounded-lg border-2 transition-all duration-200 @GetDayClass(day, isCurrentMonth, isToday, isPast, hasReservations)"
+													@onclick="() => SelectDay(day)"
+													disabled="@(!isCurrentMonth || isPast)">
+												<div class="text-sm font-semibold @(isCurrentMonth ? (isToday ? "text-blue-700" : "text-slate-800") : "text-slate-400")">
+													@day.Day
+												</div>
+												@if (isCurrentMonth && hasReservations)
+												{
+													<div class="absolute bottom-1 right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+														@reservationCount
+													</div>
+												}
+												@if (isToday)
+												{
+													<div class="absolute top-1 left-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+												}
+											</button>
+										}
+									</div>
+								</div>
+							</div>
+						}
+						else
+						{
+							<div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+								<div class="bg-gradient-to-r from-green-600 to-green-700 text-white p-6">
+									<div class="flex justify-between items-center">
+										<div>
+											<h2 class="text-2xl font-bold">🗓️ @SelectedDate.Value.ToString("dddd dd MMMM yyyy")</h2>
+											<p class="text-green-100"></p>
+										</div>
+										<button class="bg-green-500 hover:bg-green-400 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+												@onclick="BackToMonthView">
+											← Terug naar maand
+										</button>
+									</div>
+								</div>
+
+								<div class="p-6">
+									<div class="grid grid-cols-4 lg:grid-cols-6 gap-2">
+										@for (int hour = 7; hour <= 19; hour++)
+										{
+											@* First 30-minute slot *@
+											var slot1 = SelectedDate.Value.Date.AddHours(hour);
+											var isReserved1 = IsTimeSlotReserved(slot1);
+											var isPast1 = slot1 < DateTime.Now;
+											var isSelected1 = IsTimeSlotSelected(slot1);
+
+											<button class="h-16 p-2 rounded-lg border-2 transition-all duration-200 flex flex-col items-center justify-center @GetTimeSlotClass(slot1, isReserved1, isPast1, isSelected1)"
+													@onclick="() => ToggleTimeSlot(slot1)"
+													disabled="@(isReserved1 || isPast1)"
+													title="@GetTimeSlotTooltip(slot1, isReserved1)">
+												<div class="text-sm font-semibold">@hour:00</div>
+												@if (isReserved1)
+												{
+													<i class="fas fa-lock text-xs mt-1"></i>
+												}
+												else if (isPast1)
+												{
+													<i class="fas fa-clock text-xs mt-1 opacity-50"></i>
+												}
+												else if (isSelected1)
+												{
+													<i class="fas fa-check text-xs mt-1"></i>
+												}
+											</button>
+
+											@* Second 30-minute slot *@
+											var slot2 = SelectedDate.Value.Date.AddHours(hour).AddMinutes(30);
+											var isReserved2 = IsTimeSlotReserved(slot2);
+											var isPast2 = slot2 < DateTime.Now;
+											var isSelected2 = IsTimeSlotSelected(slot2);
+
+											<button class="h-16 p-2 rounded-lg border-2 transition-all duration-200 flex flex-col items-center justify-center @GetTimeSlotClass(slot2, isReserved2, isPast2, isSelected2)"
+													@onclick="() => ToggleTimeSlot(slot2)"
+													disabled="@(isReserved2 || isPast2)"
+													title="@GetTimeSlotTooltip(slot2, isReserved2)">
+												<div class="text-sm font-semibold">@hour:30</div>
+												@if (isReserved2)
+												{
+													<i class="fas fa-lock text-xs mt-1"></i>
+												}
+												else if (isPast2)
+												{
+													<i class="fas fa-clock text-xs mt-1 opacity-50"></i>
+												}
+												else if (isSelected2)
+												{
+													<i class="fas fa-check text-xs mt-1"></i>
+												}
+											</button>
+										}
+									</div>
+
+									<div class="mt-6 flex flex-wrap gap-4 text-sm">
+										<div class="flex items-center gap-2">
+											<div class="w-4 h-4 bg-white border-2 border-slate-300 rounded"></div>
+											<span class="text-slate-600">Beschikbaar</span>
+										</div>
+										<div class="flex items-center gap-2">
+											<div class="w-4 h-4 bg-red-100 border-2 border-red-300 rounded"></div>
+											<span class="text-slate-600">Bezet</span>
+										</div>
+										<div class="flex items-center gap-2">
+											<div class="w-4 h-4 bg-green-100 border-2 border-green-400 rounded"></div>
+											<span class="text-slate-600">Geselecteerd</span>
+										</div>
+										<div class="flex items-center gap-2">
+											<div class="w-4 h-4 bg-slate-100 border-2 border-slate-200 rounded"></div>
+											<span class="text-slate-600">Verleden</span>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							@if (SelectedTimeSlots.Any())
+							{
+								<div class="mt-8 bg-white rounded-2xl shadow-lg p-6">
+									<h3 class="text-xl font-bold text-slate-800 mb-4">📋 Reservering Samenvatting</h3>
+									<div class="bg-blue-50 rounded-xl p-4 mb-6">
+										<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+											<div>
+												<label class="block text-sm font-semibold text-slate-700 mb-1">Auto</label>
+												<div class="text-blue-800 font-bold">@Autos.FirstOrDefault(a => a.Id == SelectedAutoId)?.Kenteken</div>
+											</div>
+											<div>
+												<label class="block text-sm font-semibold text-slate-700 mb-1">Start</label>
+												<div class="text-blue-800 font-bold">@GetStartTime()?.ToString("dd/MM/yyyy HH:mm")</div>
+											</div>
+											<div>
+												<label class="block text-sm font-semibold text-slate-700 mb-1">Eind</label>
+												<div class="text-blue-800 font-bold">@GetEndTime()?.ToString("dd/MM/yyyy HH:mm")</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="flex flex-col sm:flex-row gap-4">
+										<button class="flex-1 bg-red-100 text-red-700 py-3 px-6 rounded-xl font-semibold hover:bg-red-200 transition-colors duration-200"
+												@onclick="ClearSelection">
+											<i class="fas fa-times mr-2"></i>
+											Annuleren
+										</button>
+										<button class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg"
+												@onclick="ConfirmReservation">
+											<i class="fas fa-calendar-check mr-2"></i>
+											Reservering Bevestigen
+										</button>
+									</div>
+								</div>
+							}
+						}
+
+						@if (!string.IsNullOrEmpty(SuccessMessage))
+						{
+							<div class="mt-6 bg-green-50 border-l-4 border-green-400 text-green-700 p-6 rounded-lg shadow-sm">
+								<div class="flex items-center">
+									<i class="fas fa-check-circle mr-3 text-lg"></i>
+									<p class="font-medium">@SuccessMessage</p>
+								</div>
+							</div>
+						}
+					}
+					else
+					{
+						<div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+							<div class="text-6xl mb-6">🚗</div>
+							<h3 class="text-2xl font-bold text-slate-800 mb-4">Selecteer een Auto</h3>
+							<p class="text-slate-600 text-lg">Kies eerst een auto om de beschikbare tijdsloten te bekijken</p>
+						</div>
+					}
+				}
+			</div>
+		</div>
+	</ChildContent>
+	<ErrorContent>
+		<div class="bg-red-50 border-l-4 border-red-400 text-red-700 p-6 rounded-lg max-w-4xl mx-auto shadow-sm">
+			<div class="flex items-center">
+				<i class="fas fa-exclamation-circle mr-3 text-lg"></i>
+				<p class="font-medium">Er is een onverwachte fout opgetreden. Probeer de pagina te vernieuwen.</p>
+			</div>
+		</div>
+	</ErrorContent>
+</ErrorBoundary>
+
+@code {
+	private List<Auto> Autos = new();
+	private List<LeenAutoReserveringDTO> AllReservations = new();
+	private List<LeenAutoReserveringDTO> CurrentReservations = new();
+	private LeenAutoReserveringDTO reservering = new();
+	private string Message = string.Empty;
+	private string SuccessMessage = string.Empty;
+	private bool IsLoading = true;
+	private int SelectedAutoId = 0;
+
+	private DateTime CurrentMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+	private DateTime? SelectedDate = null;
+
+	private HashSet<DateTime> SelectedTimeSlots = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			var user = await AuthService.GetUserInfoAsync();
+
+			if (!user.Success)
+			{
+				Nav.NavigateTo("/login");
+				return;
+			}
+			reservering.WerknemerUserName = user.Username;
+			reservering.WerknemerEmail = user.Email;
+			reservering.WerknemerId = user.UserId;
+
+			await LoadData();
+		}
+		catch (Exception ex)
+		{
+			Message = $"Fout bij laden van gegevens: {ex.Message}";
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+
+	private async Task LoadData()
+	{
+		try
+		{
+			Autos = await Http.GetFromJsonAsync<List<Auto>>("/api/Auto") ?? new();
+			AllReservations = await Http.GetFromJsonAsync<List<LeenAutoReserveringDTO>>("/api/LeenAutoReservering") ?? new();
+		}
+		catch (Exception ex)
+		{
+			Message = $"Fout bij laden van reserveringen: {ex.Message}";
+		}
+	}
+
+	private async Task OnAutoChanged(ChangeEventArgs e)
+	{
+		if (int.TryParse(e.Value?.ToString(), out int autoId))
+		{
+			SelectedAutoId = autoId;
+			reservering.AutoId = autoId;
+
+			CurrentReservations = AllReservations
+				.Where(r => r.AutoId == autoId && r.EindDatum >= DateTime.Now.AddDays(-1))
+				.ToList();
+
+			SelectedTimeSlots.Clear();
+			SelectedDate = null;
+			SuccessMessage = string.Empty;
+			Message = string.Empty;
+
+			StateHasChanged();
+		}
+		else
+		{
+			SelectedAutoId = 0;
+			reservering.AutoId = 0;
+			CurrentReservations = new();
+			SelectedTimeSlots.Clear();
+			SelectedDate = null;
+		}
+	}
+
+	private void PreviousMonth()
+	{
+		if (!IsMonthNavigationDisabled(false))
+		{
+			CurrentMonth = CurrentMonth.AddMonths(-1);
+			SelectedDate = null;
+			SelectedTimeSlots.Clear();
+		}
+	}
+
+	private void NextMonth()
+	{
+		if (!IsMonthNavigationDisabled(true))
+		{
+			CurrentMonth = CurrentMonth.AddMonths(1);
+			SelectedDate = null;
+			SelectedTimeSlots.Clear();
+		}
+	}
+
+	private bool IsMonthNavigationDisabled(bool isNext)
+	{
+		var today = DateTime.Today;
+		var currentMonth = new DateTime(today.Year, today.Month, 1);
+		var maxMonth = currentMonth.AddMonths(2);
+
+		if (isNext)
+		{
+			return CurrentMonth >= maxMonth;
+		}
+		else
+		{
+			return CurrentMonth <= currentMonth;
+		}
+	}
+
+	private List<DateTime> GetCalendarDays()
+	{
+		var firstDayOfMonth = new DateTime(CurrentMonth.Year, CurrentMonth.Month, 1);
+		var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+		var startDate = firstDayOfMonth.AddDays(-(int)firstDayOfMonth.DayOfWeek + (int)DayOfWeek.Monday);
+		if (startDate > firstDayOfMonth) startDate = startDate.AddDays(-7);
+
+		var days = new List<DateTime>();
+		var currentDate = startDate;
+
+		for (int i = 0; i < 42; i++)
+		{
+			days.Add(currentDate);
+			currentDate = currentDate.AddDays(1);
+		}
+
+		return days;
+	}
+
+	private string GetDayClass(DateTime day, bool isCurrentMonth, bool isToday, bool isPast, bool hasReservations)
+	{
+		var classes = new List<string>();
+
+		if (!isCurrentMonth || isPast)
+		{
+			classes.Add("border-slate-200 bg-slate-50 cursor-not-allowed");
+		}
+		else if (isToday)
+		{
+			classes.Add("border-blue-400 bg-blue-50 hover:bg-blue-100 cursor-pointer");
+		}
+		else if (hasReservations)
+		{
+			classes.Add("border-red-200 bg-red-50 hover:bg-red-100 cursor-pointer");
+		}
+		else
+		{
+			classes.Add("border-slate-300 bg-white hover:bg-slate-50 cursor-pointer");
+		}
+
+		return string.Join(" ", classes);
+	}
+
+	private bool HasReservationsOnDay(DateTime day)
+	{
+		return CurrentReservations.Any(r => r.StartDatum.Date == day.Date);
+	}
+
+	private int GetReservationCountForDay(DateTime day)
+	{
+		return CurrentReservations.Count(r => r.StartDatum.Date == day.Date);
+	}
+
+	private void SelectDay(DateTime day)
+	{
+		if (day.Month == CurrentMonth.Month && day.Date >= DateTime.Today)
+		{
+			SelectedDate = day;
+			SelectedTimeSlots.Clear();
+			SuccessMessage = string.Empty;
+			Message = string.Empty;
+		}
+	}
+
+	private void BackToMonthView()
+	{
+		SelectedDate = null;
+		SelectedTimeSlots.Clear();
+		SuccessMessage = string.Empty;
+		Message = string.Empty;
+	}
+
+	private bool IsTimeSlotReserved(DateTime slotDateTime)
+	{
+		return CurrentReservations.Any(r =>
+			slotDateTime >= r.StartDatum && slotDateTime < r.EindDatum);
+	}
+
+	private bool IsTimeSlotSelected(DateTime slotDateTime)
+	{
+		return SelectedTimeSlots.Contains(slotDateTime);
+	}
+
+	private LeenAutoReserveringDTO? GetReservationForSlot(DateTime slotDateTime)
+	{
+		return CurrentReservations.FirstOrDefault(r =>
+			slotDateTime >= r.StartDatum && slotDateTime < r.EindDatum);
+	}
+
+	private string GetTimeSlotTooltip(DateTime slotDateTime, bool isReserved)
+	{
+		if (isReserved)
+		{
+			var reservation = GetReservationForSlot(slotDateTime);
+			return $"Gereserveerd door {reservation?.WerknemerUserName} - {slotDateTime:HH:mm}";
+		}
+		return $"{slotDateTime:dddd dd/MM HH:mm}";
+	}
+
+	private string GetTimeSlotClass(DateTime slotDateTime, bool isReserved, bool isPast, bool isSelected)
+	{
+		if (isPast)
+			return "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed";
+		if (isReserved)
+			return "border-red-300 bg-red-100 text-red-600 cursor-not-allowed";
+		if (isSelected)
+			return "border-green-400 bg-green-100 text-green-700 shadow-md";
+
+		return "border-slate-300 bg-white hover:bg-blue-50 hover:border-blue-300 cursor-pointer";
+	}
+
+	private void ToggleTimeSlot(DateTime slotDateTime)
+	{
+		if (IsTimeSlotReserved(slotDateTime) || slotDateTime < DateTime.Now)
+			return;
+
+		if (SelectedTimeSlots.Contains(slotDateTime))
+		{
+			SelectedTimeSlots.Remove(slotDateTime);
+		}
+		else
+		{
+			SelectedTimeSlots.Add(slotDateTime);
+		}
+
+		if (SelectedTimeSlots.Count > 1)
+		{
+			var sortedSlots = SelectedTimeSlots.OrderBy(x => x).ToList();
+			var consecutiveSlots = new HashSet<DateTime>();
+
+			for (int i = 0; i < sortedSlots.Count; i++)
+			{
+				if (i == 0)
+				{
+					consecutiveSlots.Add(sortedSlots[i]);
+				}
+				else if (sortedSlots[i] == sortedSlots[i - 1].AddMinutes(30))
+				{
+					consecutiveSlots.Add(sortedSlots[i]);
+				}
+				else
+				{
+					consecutiveSlots.Clear();
+					consecutiveSlots.Add(sortedSlots[i]);
+				}
+			}
+
+			SelectedTimeSlots = consecutiveSlots;
+		}
+
+		SuccessMessage = string.Empty;
+		Message = string.Empty;
+	}
+
+	private DateTime? GetStartTime()
+	{
+		return SelectedTimeSlots.Any() ? SelectedTimeSlots.Min() : null;
+	}
+
+	private DateTime? GetEndTime()
+	{
+		return SelectedTimeSlots.Any() ? SelectedTimeSlots.Max().AddMinutes(30) : null;
+	}
+
+	private void ClearSelection()
+	{
+		SelectedTimeSlots.Clear();
+		SuccessMessage = string.Empty;
+		Message = string.Empty;
+	}
+
+	private async Task ConfirmReservation()
+	{
+		if (!SelectedTimeSlots.Any())
+		{
+			Message = "Selecteer eerst een tijdslot.";
+			return;
+		}
+
+		var startTime = GetStartTime()!.Value;
+		var endTime = GetEndTime()!.Value;
+
+		if (startTime < DateTime.Now)
+		{
+			Message = "Kan geen reservering maken in het verleden.";
+			return;
+		}
+
+		var hasConflict = CurrentReservations.Any(r =>
+			!(endTime <= r.StartDatum || startTime >= r.EindDatum));
+
+		if (hasConflict)
+		{
+			Message = "Er is een conflict met een bestaande reservering.";
+			return;
+		}
+
+		var selectedAuto = Autos.FirstOrDefault(a => a.Id == SelectedAutoId);
+		if (selectedAuto == null)
+		{
+			Message = "Geselecteerde auto niet gevonden.";
+			return;
+		}
+
+		try
+		{
+			var newReservation = new LeenAutoReserveringDTO
+				{
+					AutoId = SelectedAutoId,
+					WerknemerId = reservering.WerknemerId,
+					WerknemerUserName = reservering.WerknemerUserName,
+					WerknemerEmail = reservering.WerknemerEmail,
+					StartDatum = startTime,
+					EindDatum = endTime,
+					Auto = new AutoDTO
+					{
+						Id = selectedAuto.Id,
+						Kenteken = selectedAuto.Kenteken,
+						Kilometerstand = selectedAuto.Kilometerstand,
+						Naam = selectedAuto.Naam
+					}
+				};
+
+			var response = await Http.PostAsJsonAsync("api/LeenAutoReservering", newReservation);
+			if (response.IsSuccessStatusCode)
+			{
+				SuccessMessage = $"Reservering succesvol aangemaakt voor {selectedAuto.Naam} van {startTime:dd/MM HH:mm} tot {endTime:dd/MM HH:mm}!";
+
+				SelectedTimeSlots.Clear();
+				SelectedDate = null;
+				await LoadData();
+
+				CurrentReservations = AllReservations
+					.Where(r => r.AutoId == SelectedAutoId && r.EindDatum >= DateTime.Now.AddDays(-1))
+					.ToList();
+			}
+			else
+			{
+				var errorContent = await response.Content.ReadAsStringAsync();
+				Message = $"Fout bij het maken van de reservering: {errorContent}";
+			}
+		}
+		catch (Exception ex)
+		{
+			Message = $"Fout bij het maken van de reservering: {ex.Message}";
+		}
+	}
+}

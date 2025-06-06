@@ -9,5 +9,6 @@
         public AppUser Werknemer { get; set; }
         public int AutoId { get; set; }
         public Auto Auto { get; set; }
+        public bool RitVoltooid { get; set; }
     }
 }

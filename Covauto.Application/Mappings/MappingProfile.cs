@@ -21,7 +21,9 @@ namespace Covauto.Application.Mappings
                .ForMember(dest => dest.Auto, opt => opt.MapFrom(src => src.Auto))
                .ReverseMap()
                .ForMember(dest => dest.Auto, opt => opt.Ignore())
-               .ForMember(dest => dest.Werknemer, opt => opt.Ignore());
+               .ForMember(dest => dest.Werknemer, opt => opt.Ignore())
+               .ForMember(dest => dest.RitVoltooid, opt => opt.MapFrom(src => src.RitVoltooid));
+
         }
     }
 }

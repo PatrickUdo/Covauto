@@ -10,5 +10,6 @@
         public string WerknemerEmail { get; set; }
         public int AutoId { get; set; }
         public AutoDTO Auto { get; set; }
+        public bool RitVoltooid { get; set; }
     }
 }

@@ -33,6 +33,7 @@ namespace Covauto.Domain
             existing.WerknemerId = updated.WerknemerId;
             existing.StartDatum = updated.StartDatum;
             existing.EindDatum = updated.EindDatum;
+            existing.RitVoltooid = updated.RitVoltooid;
             await _context.SaveChangesAsync();
             return true;
         }

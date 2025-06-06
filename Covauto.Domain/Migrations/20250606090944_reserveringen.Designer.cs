@@ -3,6 +3,7 @@ using System;
 using Covauto.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Covauto.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class LeenAutoContextModelSnapshot : ModelSnapshot
+    [Migration("20250606090944_reserveringen")]
+    partial class reserveringen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -115,7 +118,7 @@ namespace Covauto.Domain.Migrations
                     b.Property<DateTime>("EindDatum")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("RitVoltooid")
+                    b.Property<bool?>("RitVoltooid")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("StartDatum")

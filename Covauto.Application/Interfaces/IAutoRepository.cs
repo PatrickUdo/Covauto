@@ -1,13 +1,10 @@
-﻿using Covauto.Domain.Entities;
+﻿using Covauto.Shared.DTOs;
 
-namespace Covauto.Application.Interfaces
+public interface IAutoRepository
 {
-    public interface IAutoRepository
-    {
-        Task<IEnumerable<Auto>> GetAllAsync();
-        Task<Auto?> GetByIdAsync(int id);
-        Task<Auto> AddAsync(Auto auto);
-        Task<bool> UpdateAsync(int id, Auto updatedAuto);
-        Task<bool> DeleteAsync(int id);
-    }
+    Task<IEnumerable<AutoDTO>> GetAllAsync();
+    Task<AutoDTO?> GetByIdAsync(int id);
+    Task<AutoDTO> AddAsync(AutoDTO auto);
+    Task<bool> UpdateAsync(int id, AutoDTO updatedAuto);
+    Task<bool> DeleteAsync(int id);
 }

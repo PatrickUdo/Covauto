@@ -239,6 +239,29 @@
 										</div>
 									</div>
 
+									@* Address Input Fields *@
+									<div class="bg-slate-50 rounded-xl p-4 mb-6">
+										<h4 class="text-lg font-semibold text-slate-800 mb-4">📍 Reis Details</h4>
+										<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+											<div>
+												<label class="block text-sm font-semibold text-slate-700 mb-2">Begin Adres</label>
+												<input type="text"
+													   class="w-full p-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+													   placeholder="Begin Adres"
+													   @bind="BeginAdres"
+													   @bind:event="oninput" />
+											</div>
+											<div>
+												<label class="block text-sm font-semibold text-slate-700 mb-2">Eind Adres</label>
+												<input type="text"
+													   class="w-full p-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+													   placeholder="Eind Adres"
+													   @bind="EindAdres"
+													   @bind:event="oninput" />
+											</div>
+										</div>
+									</div>
+
 									<div class="flex flex-col sm:flex-row gap-4">
 										<button class="flex-1 bg-red-100 text-red-700 py-3 px-6 rounded-xl font-semibold hover:bg-red-200 transition-colors duration-200"
 												@onclick="ClearSelection">
@@ -301,6 +324,9 @@
 	private DateTime? SelectedDate = null;
 
 	private HashSet<DateTime> SelectedTimeSlots = new();
+
+	private string BeginAdres = string.Empty;
+	private string EindAdres = string.Empty;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -574,6 +600,8 @@
 	private void ClearSelection()
 	{
 		SelectedTimeSlots.Clear();
+		BeginAdres = string.Empty;
+		EindAdres = string.Empty;
 		SuccessMessage = string.Empty;
 		Message = string.Empty;
 	}
@@ -583,6 +611,18 @@
 		if (!SelectedTimeSlots.Any())
 		{
 			Message = "Selecteer eerst een tijdslot.";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(BeginAdres))
+		{
+			Message = "Vul het begin adres in.";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(EindAdres))
+		{
+			Message = "Vul het eind adres in.";
 			return;
 		}
 
@@ -627,7 +667,10 @@
 						Kenteken = selectedAuto.Kenteken,
 						Kilometerstand = selectedAuto.Kilometerstand,
 						Naam = selectedAuto.Naam
-					}
+					},
+
+					BeginAdres = BeginAdres,
+					EindAdres = EindAdres
 				};
 
 			var response = await Http.PostAsJsonAsync("api/LeenAutoReservering", newReservation);
@@ -636,6 +679,8 @@
 				SuccessMessage = $"Reservering succesvol aangemaakt voor {selectedAuto.Naam} van {startTime:dd/MM HH:mm} tot {endTime:dd/MM HH:mm}!";
 
 				SelectedTimeSlots.Clear();
+				BeginAdres = string.Empty;
+				EindAdres = string.Empty;
 				SelectedDate = null;
 				await LoadData();
 

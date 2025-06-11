@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using Covauto.Domain.Entities;
+﻿using Covauto.Shared.DTOs;
 using Covauto.Application.Interfaces;
-using Covauto.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Covauto.API.Controllers
@@ -11,20 +9,17 @@ namespace Covauto.API.Controllers
     public class LeenAutoReserveringController : ControllerBase
     {
         private readonly ILeenAutoReserveringRepository _repo;
-        private readonly IMapper _mapper;
 
-        public LeenAutoReserveringController(ILeenAutoReserveringRepository repo, IMapper mapper)
+        public LeenAutoReserveringController(ILeenAutoReserveringRepository repo)
         {
             _repo = repo;
-            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var reserveringen = await _repo.GetAllAsync();
-            var reserveringDtos = _mapper.Map<IEnumerable<LeenAutoReserveringDTO>>(reserveringen);
-            return Ok(reserveringDtos);
+            return Ok(reserveringen);
         }
 
         [HttpGet("{id}")]
@@ -32,24 +27,21 @@ namespace Covauto.API.Controllers
         {
             var reservering = await _repo.GetByIdAsync(id);
             if (reservering == null) return NotFound();
-            var reserveringDto = _mapper.Map<LeenAutoReserveringDTO>(reservering);
-            return Ok(reserveringDto);
+
+            return Ok(reservering);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] LeenAutoReserveringDTO reserveringDto)
         {
-            var reservering = _mapper.Map<LeenAutoReservering>(reserveringDto);
-            var createdReservering = await _repo.AddAsync(reservering);
-            var createdReserveringDto = _mapper.Map<LeenAutoReserveringDTO>(createdReservering);
-            return CreatedAtAction(nameof(GetById), new { id = createdReserveringDto.Id }, createdReserveringDto);
+            var createdReservering = await _repo.AddAsync(reserveringDto);
+            return CreatedAtAction(nameof(GetById), new { id = createdReservering.Id }, createdReservering);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] LeenAutoReserveringDTO reserveringDto)
         {
-            var reservering = _mapper.Map<LeenAutoReservering>(reserveringDto);
-            var success = await _repo.UpdateAsync(id, reservering);
+            var success = await _repo.UpdateAsync(id, reserveringDto);
             return success ? NoContent() : NotFound();
         }
 

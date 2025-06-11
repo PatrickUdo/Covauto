@@ -1,11 +1,11 @@
 ﻿using Covauto.Shared.DTOs;
+using Covauto.Application.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
-using Covauto.Application;
 
 namespace Covauto.API.Controllers
 {
@@ -13,16 +13,17 @@ namespace Covauto.API.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly AuthService _authService;
-        public AuthController(AuthService authService)
+        private readonly IAuthRepository _authRepository;
+
+        public AuthController(IAuthRepository authRepository)
         {
-            _authService = authService;
+            _authRepository = authRepository;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            var result = await _authService.Register(registerDto);
+            var result = await _authRepository.RegisterAsync(registerDto);
             if (result.Succeeded) return Ok("User registered successfully.");
             return BadRequest(result.Errors);
         }
@@ -31,31 +32,18 @@ namespace Covauto.API.Controllers
         [EnableRateLimiting("LoginLimiter")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            var userByEmail = await _authService.FindUserByEmail(loginDto.Email);
-            if (userByEmail != null && await _authService.IsLockedOut(userByEmail))
+            var (isSuccess, userId, userName, email) = await _authRepository.ValidateUserAsync(loginDto);
+
+            if (!isSuccess)
             {
-                return StatusCode(StatusCodes.Status423Locked, "Try again later.");
-            }
-
-            var user = await _authService.ValidateUser(loginDto);
-
-            if (user == null)
-            {
-                if (userByEmail != null && await _authService.IsLockedOut(userByEmail))
-                {
-                    return StatusCode(StatusCodes.Status423Locked, "Too many failed login attempts. Try again later.");
-                }
-
                 return Unauthorized("Invalid credentials.");
             }
 
-            await _authService.ResetFailedAttempts(user);
-
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Name, userName!),
+                new Claim(ClaimTypes.NameIdentifier, userId!),
+                new Claim(ClaimTypes.Email, email!)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

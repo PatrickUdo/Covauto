@@ -11,5 +11,7 @@
         public int AutoId { get; set; }
         public AutoDTO Auto { get; set; }
         public bool RitVoltooid { get; set; }
+        public string BeginAdres { get; set; }
+        public string EindAdres { get; set; }
     }
 }

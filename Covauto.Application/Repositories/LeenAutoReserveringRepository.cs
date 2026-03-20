@@ -12,20 +12,25 @@ namespace Covauto.Domain
 
         public LeenAutoReserveringRepository(AppDbContext context) => _context = context;
 
-        public async Task<IEnumerable<LeenAutoReserveringDTO>> GetAllAsync() =>
-            await _context.LeenAutoReserveringen
+        public async Task<IEnumerable<LeenAutoReserveringDTO>> GetAllAsync()
+        {
+            return await _context.LeenAutoReserveringen
+                .Include(r => r.Werknemer)
                 .Select(r => new LeenAutoReserveringDTO
                 {
                     Id = r.Id,
-                    AutoId = r.AutoId,
-                    WerknemerId = r.WerknemerId,
                     StartDatum = r.StartDatum,
                     EindDatum = r.EindDatum,
+                    WerknemerId = r.WerknemerId,
+                    WerknemerUserName = r.Werknemer.UserName,
+                    WerknemerEmail = r.Werknemer.Email,
+                    AutoId = r.AutoId,
                     RitVoltooid = r.RitVoltooid,
                     BeginAdres = r.BeginAdres,
                     EindAdres = r.EindAdres
                 })
                 .ToListAsync();
+        }
 
         public async Task<LeenAutoReserveringDTO?> GetByIdAsync(int id)
         {

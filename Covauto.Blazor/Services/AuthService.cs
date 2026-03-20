@@ -1,7 +1,6 @@
 ﻿using Covauto.Blazor.Interfaces;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Covauto.Shared.DTOs;
 
 namespace Covauto.Blazor.Services
@@ -77,6 +76,42 @@ namespace Covauto.Blazor.Services
             }
         }
 
+        public async Task<(bool Success, string Message)> RegisterAsync(string email, string password)
+        {
+            try
+            {
+                var registerData = new
+                {
+                    username = email,
+                    email = email,
+                    password = password
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "api/auth/register");
+                request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+                request.Content = new StringContent(
+                    JsonSerializer.Serialize(registerData),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, "Registration successful");
+                }
+                else
+                {
+                    return (false, $"Registration failed: {content}");
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"An error occurred: {ex.Message}");
+            }
+        }
+
         public async Task<bool> LogoutAsync()
         {
             try
@@ -138,6 +173,5 @@ namespace Covauto.Blazor.Services
                 };
             }
         }
-
     }
 }

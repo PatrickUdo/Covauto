@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Covauto.Shared", "Covauto.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Covauto.Blazor", "Covauto.Blazor\Covauto.Blazor.csproj", "{61B7EA08-3C78-4007-911B-19B2CDD50050}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Covauto.WinForms", "Covauto.WinForms\Covauto.WinForms.csproj", "{6E0035AD-E088-4CB5-8AD4-7159B5B6C7E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{61B7EA08-3C78-4007-911B-19B2CDD50050}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61B7EA08-3C78-4007-911B-19B2CDD50050}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61B7EA08-3C78-4007-911B-19B2CDD50050}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E0035AD-E088-4CB5-8AD4-7159B5B6C7E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E0035AD-E088-4CB5-8AD4-7159B5B6C7E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E0035AD-E088-4CB5-8AD4-7159B5B6C7E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E0035AD-E088-4CB5-8AD4-7159B5B6C7E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

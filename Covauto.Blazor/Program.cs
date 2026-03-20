@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Covauto.Blazor;
-using System;
-using System.Net.Http;
-using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using Covauto.Blazor.Services;
 using Covauto.Blazor.Interfaces;
 
